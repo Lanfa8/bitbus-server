@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { NextFunction } from 'express';
 import { Request, Response } from 'express';
 import { artefatoController } from './controllers/artefatoController';
-import { AlreadyCreatedRegister } from './exceptions/AlreadyCreatedRegister';
-import { ValidationException } from './exceptions/ValidationException';
+import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware';
 
 const app = express();
+const artefatoRouter = express.Router();
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
@@ -13,7 +13,7 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-app.post("/artefato", async (req: Request, res: Response) => {
+artefatoRouter.post("/", async (req: Request, res: Response, next: NextFunction) => {
   const artefato = {
     ...req.body.artefato
   };
@@ -21,21 +21,35 @@ app.post("/artefato", async (req: Request, res: Response) => {
   try {
     const register = await artefatoController.save(artefato);
     res.status(200).send(register);
-    return;
   } catch (error) {
-    if (error instanceof AlreadyCreatedRegister) {
-      res.status(409).send({ error: error.message });
-      return;
-    } 
-    
-    if (error instanceof ValidationException) {
-      res.status(400).send({ error: error.message });
-      return;
-    }
-    
-    res.status(500).send({ error: error.message });
+    next(error);
   }
 });
+
+artefatoRouter.patch("/:id", async (req: Request, res: Response, next: NextFunction) => {
+  const artefato = {
+    ...req.body.artefato
+  };
+
+  try {
+    const register = await artefatoController.update(Number(req.params.id), artefato);
+    res.status(200).send(register);
+  } catch (error) {
+    next(error);
+  }
+});
+
+artefatoRouter.delete("/:id", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await artefatoController.delete(Number(req.params.id));
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+artefatoRouter.use(errorHandlingMiddleware);
+app.use('/artefato', artefatoRouter);
 
 app.listen(3000, () => {
   console.log('Application started on port 3000!');

@@ -2,17 +2,13 @@ import { prisma } from '../utils/connection';
 import { AlreadyCreatedRegister } from '../exceptions/AlreadyCreatedRegister';
 import { artefato as artefatoEntity } from '@prisma/client';
 import { ValidationException } from '../exceptions/ValidationException';
+import { validateObjectNodes } from '../utils/validation';
 
 export const artefatoController = {
     async save(artefato: Partial<artefatoEntity> & {
         categoria: string;
     }): Promise<artefatoEntity> {
-        const camposObrigatorios = ['nome', 'codigo', 'informacoes', 'ano', 'quantidade', 'origem', 'categoria'];
-        const camposNaoPreenchidos = camposObrigatorios.filter(campo => !artefato[campo]);
-        
-        if (camposNaoPreenchidos.length) {
-            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`);
-        }
+        await artefatoController.validateArtefato(artefato);
 
         const saved = await prisma.artefato.findFirst({
             where: {
@@ -60,6 +56,37 @@ export const artefatoController = {
 
         return newArtefato;
     },
+    async validateArtefato(artefato: Partial<artefatoEntity> & {
+        categoria: string;
+    }): Promise<void> {
+        const camposObrigatorios = ['nome', 'codigo', 'informacoes', 'ano', 'quantidade', 'origem', 'categoria'];
+        const camposNaoPreenchidos = validateObjectNodes(artefato, camposObrigatorios);
+        
+        if (camposNaoPreenchidos.length) {
+            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`);
+        }
+
+        return Promise.resolve();
+    },
+    async update(id: number, artefato: Partial<artefatoEntity>): Promise<artefatoEntity> {
+        const updated = await prisma.artefato.update({
+            where: {
+                id
+            },
+            data: artefato
+        });
+
+        return updated;
+    },
+    async delete(id: number): Promise<void> {
+        if (!id) throw new ValidationException('ID não informado');
+
+        await prisma.artefato.delete({
+            where: {
+                id
+            }
+        });
+    }
     // async update(req: Request, res: Response) {
     //     const { id } = req.params;
     //     const artefato = await ArtefatoService.update(id, req.body);

@@ -1,22 +1,27 @@
-import { artefato as artefatoEntity } from '@prisma/client'
-import { prisma } from '../utils/connection'
+import { prisma } from '../utils/connection';
 import { AlreadyCreatedRegister } from '../exceptions/AlreadyCreatedRegister';
+import { artefato as artefatoEntity } from '@prisma/client';
+import { ValidationException } from '../exceptions/ValidationException';
 
 export const artefatoController = {
-    async save(artefato: {
-        nome: string;
-        descricao: string;
-        origem: string;
+    async save(artefato: Partial<artefatoEntity> & {
         categoria: string;
     }): Promise<artefatoEntity> {
+        const camposObrigatorios = ['nome', 'codigo', 'informacoes', 'ano', 'quantidade', 'origem', 'categoria'];
+        const camposNaoPreenchidos = camposObrigatorios.filter(campo => !artefato[campo]);
+        
+        if (camposNaoPreenchidos.length) {
+            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`);
+        }
+
         const saved = await prisma.artefato.findFirst({
             where: {
-                nome: artefato.nome
+                codigo: artefato.codigo
             }
         });
 
         if (saved) {
-            throw new AlreadyCreatedRegister('Um artefato com esse nome já foi cadastrado');
+            throw new AlreadyCreatedRegister('Um artefato com esse codigo já foi cadastrado');
         }
 
         let categoria = await prisma.categoria.findFirst({
@@ -36,7 +41,13 @@ export const artefatoController = {
         const newArtefato = await prisma.artefato.create({
             data: {
                 nome: artefato.nome,
-                descricao: artefato.descricao,
+                codigo: artefato.codigo,
+                informacoes: artefato.informacoes,
+                ano: artefato.ano,
+                quantidade: artefato.quantidade,
+                dimensoes: artefato.dimensoes,
+                localArmazenamento: artefato.localArmazenamento,
+                link: artefato.link,
                 origem: artefato.origem,
                 dataInclusao: new Date(),
                 categoria: {

@@ -8,13 +8,20 @@ datasource db {
 }
 
 model artefato {
-  id           Int        @id @default(autoincrement())
-  nome         String     @db.VarChar(255)
-  descricao    String     @db.Text
-  dataInclusao DateTime   @db.Date
-  origem       String?    @db.VarChar(255)
-  categoriaId  Int?
-  categoria    categoria? @relation(fields: [categoriaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "artefato_ibfk_1")
+  id                 Int        @id @default(autoincrement())
+  codigo             String?    @db.VarChar(255)
+  nome               String     @db.VarChar(255)
+  ano                String     @db.VarChar(255)
+  quantidade         Int
+  dimensoes          String?    @db.VarChar(50)
+  informacoes        String     @db.Text
+  link               String?    @db.Text
+  localArmazenamento String?    @db.VarChar(255)
+  fotoMiniatura      String?    @db.VarChar(255)
+  dataInclusao       DateTime   @db.Date
+  origem             String?    @db.VarChar(255)
+  categoriaId        Int?
+  categoria          categoria? @relation(fields: [categoriaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "artefato_ibfk_1")
 
   @@index([categoriaId], map: "categoriaId")
 }

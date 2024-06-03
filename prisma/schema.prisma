@@ -31,3 +31,22 @@ model categoria {
   descricao String     @db.VarChar(255)
   artefato  artefato[]
 }
+
+model pessoa {
+  id     Int      @id @default(autoincrement())
+  nome   String   @db.VarChar(255)
+  email  String   @db.VarChar(255)
+  tipo   Int      @db.TinyInt
+  evento evento[]
+}
+
+model evento {
+  id          Int       @id @default(autoincrement())
+  data        DateTime? @db.DateTime(0)
+  local       String?   @db.VarChar(255)
+  tipo        Int       @db.TinyInt
+  responsavel Int?
+  pessoa      pessoa?   @relation(fields: [responsavel], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "evento_ibfk_1")
+
+  @@index([responsavel], map: "responsavel")
+}

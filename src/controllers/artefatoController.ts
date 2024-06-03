@@ -127,14 +127,4 @@ export const artefatoController = {
         };
     
     }
-    // async update(req: Request, res: Response) {
-    //     const { id } = req.params;
-    //     const artefato = await ArtefatoService.update(id, req.body);
-    //     return res.json(artefato);
-    // },
-    // async delete(req: Request, res: Response) {
-    //     const { id } = req.params;
-    //     const artefato = await ArtefatoService.delete(id);
-    //     return res.json(artefato);
-    // },
 };

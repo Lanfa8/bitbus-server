@@ -3,12 +3,14 @@ import { Request, Response } from 'express';
 import { artefatoRouter } from './routers/artefatoRouter';
 import { eventoRouter } from './routers/eventoRouter';
 import { authMiddleware } from './middlewares/authMiddleware';
+import dotenv from 'dotenv';
+import cors from 'cors';
 
-const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.get('/', (req: Request, res: Response) => {
   res.send({

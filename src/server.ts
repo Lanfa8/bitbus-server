@@ -5,6 +5,7 @@ import { eventoRouter } from './routers/eventoRouter';
 import { authMiddleware } from './middlewares/authMiddleware';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { categoriaRouter } from './routers/categoriaRouter';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use(authMiddleware);
 app.use('/artefato', artefatoRouter);
 app.use('/evento', eventoRouter);
+app.use('/categoria', categoriaRouter);
 
 app.listen(3000, () => {
   console.log('Application started on port 3000!');

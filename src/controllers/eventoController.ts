@@ -62,24 +62,24 @@ export const eventoController = {
         const camposNaoPreenchidos = validateObjectNodes(evento, camposObrigatorios);
         
         if (camposNaoPreenchidos.length) {
-            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`);
+            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`, [...camposNaoPreenchidos]);
         }
 
         if (evento.data && isNaN(new Date(evento.data).getTime())) {
-            throw new ValidationException('Data inválida');
+            throw new ValidationException('Data inválida', ['data']);
         }
 
         const camposResponsavel = ['nome', 'email', 'tipo'];
         const camposNaoPreenchidosResponsavel = validateObjectNodes(evento.responsavel, camposResponsavel);
 
         if (camposNaoPreenchidosResponsavel.length) {
-            throw new ValidationException(`Campos obrigatórios do nodo 'responsavel' não preenchidos: ${camposNaoPreenchidosResponsavel.join(', ')}`);
+            throw new ValidationException(`Campos obrigatórios do nodo 'responsavel' não preenchidos: ${camposNaoPreenchidosResponsavel.join(', ')}`, [...camposNaoPreenchidosResponsavel]);
         }
 
         return Promise.resolve();
     },
     async update(id: number, evento: Partial<EventoEntity>): Promise<EventoEntity> {
-        if (!id) throw new ValidationException('ID não informado');
+        if (!id) throw new ValidationException('ID não informado', ['id']);
         
         const updated = await prisma.evento.update({
             where: {
@@ -91,7 +91,7 @@ export const eventoController = {
         return updated;
     },
     async delete(id: number): Promise<void> {
-        if (!id) throw new ValidationException('ID não informado');
+        if (!id) throw new ValidationException('ID não informado', ['id']);
 
         await prisma.evento.delete({
             where: {

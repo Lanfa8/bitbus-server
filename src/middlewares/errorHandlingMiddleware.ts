@@ -10,7 +10,7 @@ export const errorHandlingMiddleware = (err: Error, req: Request, res: Response,
     } 
     
     if (err instanceof ValidationException) {
-        res.status(400).send({ error: err.message });
+        res.status(400).send({ error: err.message, fields: err.fields });
         return;
     }
     

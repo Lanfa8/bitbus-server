@@ -1,7 +1,10 @@
 export class ValidationException extends Error {
-  constructor(message) {
+  fields: string[] = [];
+
+  constructor(message, fields = []) {
     super(message);
     this.name = this.constructor.name;
+    this.fields = fields;
     Object.setPrototypeOf(this, ValidationException.prototype);
   }
 }

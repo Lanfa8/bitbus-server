@@ -64,7 +64,7 @@ export const artefatoController = {
         const camposNaoPreenchidos = validateObjectNodes(artefato, camposObrigatorios);
         
         if (camposNaoPreenchidos.length) {
-            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`);
+            throw new ValidationException(`Campos obrigatórios não preenchidos: ${camposNaoPreenchidos.join(', ')}`, [...camposNaoPreenchidos]);
         }
 
         return Promise.resolve();
@@ -80,7 +80,7 @@ export const artefatoController = {
         return updated;
     },
     async delete(id: number): Promise<void> {
-        if (!id) throw new ValidationException('ID não informado');
+        if (!id) throw new ValidationException('ID não informado', ['id']);
 
         await prisma.artefato.delete({
             where: {

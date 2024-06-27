@@ -1,9 +1,18 @@
+import { debug } from 'console';
 import { artefatoController } from '../controllers/artefatoController';
 import { errorHandlingMiddleware } from '../middlewares/errorHandlingMiddleware';
-import express, { NextFunction } from 'express';
-import { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
+import fileUpload from 'express-fileupload';
 
+type UploadedFile = fileUpload.UploadedFile;
 export const artefatoRouter = express.Router();
+
+artefatoRouter.use(fileUpload({
+  limits: { fileSize: 10 * 1024 * 1024 },
+  useTempFiles : true,
+  tempFileDir : '/tmp/',
+  debug: true
+}))
 
 artefatoRouter.post("/", async (req: Request, res: Response, next: NextFunction) => {
   const artefato = {
@@ -52,6 +61,36 @@ artefatoRouter.get("/", async (req: Request, res: Response, next: NextFunction) 
   try {
     const result = await artefatoController.list(filters);
     res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+function isUploadedFile(file: UploadedFile | UploadedFile[]): file is UploadedFile {
+  return typeof file === 'object' && (file as UploadedFile).name !== undefined;
+}
+
+artefatoRouter.put("/:id/photo", async (req: Request, res: Response, next: NextFunction) => { 
+  if (req.files === undefined || req.files.photo === undefined || !isUploadedFile(req.files.photo)) {
+    next(new Error('Arquivo de imagem não informado'));
+    return;
+  }
+
+  const file = req.files.photo;
+
+  try {
+    const UFileName = `${new Date().getTime()}-${file.name.replace(/ /g, "-")}`;
+
+    file.mv(`${__dirname}/client/public/uploads/${UFileName}`, async (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err);
+      }
+
+      const register = await artefatoController.setPhoto(Number(req.params.id), `/uploads/${UFileName}`);
+      res.status(200).send({ fileName: UFileName, filePath: `/uploads/${UFileName}` });
+    });
+    
   } catch (error) {
     next(error);
   }

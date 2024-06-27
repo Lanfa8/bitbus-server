@@ -69,12 +69,38 @@ export const artefatoController = {
 
         return Promise.resolve();
     },
-    async update(id: number, artefato: Partial<ArtefatoEntity>): Promise<ArtefatoEntity> {
+    async update(id: number, artefato: Partial<ArtefatoEntity> & {categoria: string}): Promise<ArtefatoEntity> {
+        let categoria = await prisma.categoria.findFirst({
+            where: {
+                descricao: artefato.categoria
+            }
+        });
+
+        if (!categoria) {
+            categoria = await prisma.categoria.create({
+                data: {
+                    descricao: artefato.categoria
+                }
+            });
+        }
+
         const updated = await prisma.artefato.update({
             where: {
                 id
             },
-            data: artefato
+            data: {
+                ano: artefato.ano,
+                categoriaId: categoria.id,
+                codigo: artefato.codigo,
+                dimensoes: artefato.dimensoes,
+                informacoes: artefato.informacoes,
+                link: artefato.link,
+                localArmazenamento: artefato.localArmazenamento,
+                nome: artefato.nome,
+                origem: artefato.origem,
+                quantidade: artefato.quantidade,
+                fotoMiniatura: artefato.fotoMiniatura
+            }
         });
 
         return updated;
@@ -126,5 +152,17 @@ export const artefatoController = {
             total
         };
     
+    },
+    async setPhoto(id: number, photo: string): Promise<ArtefatoEntity> {
+        const updated = await prisma.artefato.update({
+            where: {
+                id
+            },
+            data: {
+                fotoMiniatura: photo
+            }
+        });
+
+        return updated;
     }
 };

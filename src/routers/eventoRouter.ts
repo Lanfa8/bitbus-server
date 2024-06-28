@@ -2,9 +2,11 @@ import { errorHandlingMiddleware } from '../middlewares/errorHandlingMiddleware'
 import express, { NextFunction } from 'express';
 import { Request, Response } from 'express';
 import { eventoController } from '../controllers/eventoController';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 export const eventoRouter = express.Router();
 
+eventoRouter.use(authMiddleware);
 eventoRouter.post("/", async (req: Request, res: Response, next: NextFunction) => {
   const evento = {
     ...req.body.evento

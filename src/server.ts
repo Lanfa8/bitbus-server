@@ -2,7 +2,6 @@ import express, { NextFunction } from 'express';
 import { Request, Response } from 'express';
 import { artefatoRouter } from './routers/artefatoRouter';
 import { eventoRouter } from './routers/eventoRouter';
-import { authMiddleware } from './middlewares/authMiddleware';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { categoriaRouter } from './routers/categoriaRouter';
@@ -19,10 +18,10 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-app.use(authMiddleware);
 app.use('/artefato', artefatoRouter);
 app.use('/evento', eventoRouter);
 app.use('/categoria', categoriaRouter);
+app.use(express.static(__dirname + '/public'));
 
 app.listen(3000, () => {
   console.log('Application started on port 3000!');

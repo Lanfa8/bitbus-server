@@ -5,6 +5,7 @@ import { eventoRouter } from './routers/eventoRouter';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { categoriaRouter } from './routers/categoriaRouter';
+import { pessoaRouter } from './routers/pessoaRouter';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/artefato', artefatoRouter);
 app.use('/evento', eventoRouter);
 app.use('/categoria', categoriaRouter);
+app.use('/pessoa', pessoaRouter);
 app.use(express.static(__dirname + '/public'));
 
 app.listen(3000, () => {

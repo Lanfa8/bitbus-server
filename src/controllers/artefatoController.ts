@@ -45,7 +45,7 @@ export const artefatoController = {
                 dimensoes: artefato.dimensoes,
                 localArmazenamento: artefato.localArmazenamento,
                 link: artefato.link,
-                origem: artefato.origem,
+                origem: String(artefato.origem),
                 dataInclusao: new Date(),
                 categoria: {
                     connect: {
@@ -97,7 +97,7 @@ export const artefatoController = {
                 link: artefato.link,
                 localArmazenamento: artefato.localArmazenamento,
                 nome: artefato.nome,
-                origem: artefato.origem,
+                origem: String(artefato.origem),
                 quantidade: artefato.quantidade,
                 fotoMiniatura: artefato.fotoMiniatura
             }

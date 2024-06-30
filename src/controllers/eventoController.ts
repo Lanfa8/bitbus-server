@@ -4,6 +4,7 @@ import { evento as EventoEntity, pessoa as PessoaEntity } from '@prisma/client';
 import { ValidationException } from '../exceptions/ValidationException';
 import { validateObjectNodes } from '../utils/validation';
 import { PaginationTypes } from 'src/utils/paginationTypes';
+import { mailController } from './mailController';
 
 export const eventoController = {
     async save(evento: Partial<EventoEntity> & {
@@ -53,6 +54,8 @@ export const eventoController = {
                 },
             }
         });
+
+        this.sendEmailWithEventDetails(newEvento.id);
 
         return newEvento;
     },
@@ -170,5 +173,32 @@ export const eventoController = {
         });
 
         return updated;
+    },
+    async sendEmailWithEventDetails(id: number): Promise<boolean> {
+        const evento = await prisma.evento.findUnique({
+            where: {
+                id
+            },
+            include: {
+                pessoa: true
+            }
+        });
+
+        if (!evento) {
+            throw new ValidationException('Evento não encontrado', ['id']);
+        }
+
+        try {            
+            mailController.sendMail(
+                `Olá ${evento.pessoa.nome}, o evento ${evento.nome} foi cadastrado com sucesso!`,
+                'Evento cadastrado com sucesso', 
+                evento.pessoa.email
+            );
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+
+        return true;
     }
 };

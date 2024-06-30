@@ -3,6 +3,7 @@ import { errorHandlingMiddleware } from '../middlewares/errorHandlingMiddleware'
 import express, { NextFunction, Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
 import { authMiddleware } from '../middlewares/authMiddleware';
+import { fileUploadController } from '../controllers/fileUploadController';
 
 type UploadedFile = fileUpload.UploadedFile;
 export const artefatoRouter = express.Router();
@@ -72,30 +73,20 @@ function isUploadedFile(file: UploadedFile | UploadedFile[]): file is UploadedFi
 }
 
 artefatoRouter.put("/:id/foto", async (req: Request, res: Response, next: NextFunction) => { 
-  console.log("teste")
   if (req.files === undefined || req.files.photo === undefined || !isUploadedFile(req.files.photo)) {
     next(new Error('Arquivo de imagem não informado'));
     return;
   }
 
   const file = req.files.photo;
-
   try {
-    const UFileName = `${new Date().getTime()}-${file.name.replace(/ /g, "-")}`;
-
-    file.mv(`${process.cwd()}/src/public/uploads/${UFileName}`, async (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err);
-      }
-
-      const register = await artefatoController.setPhoto(Number(req.params.id), `/uploads/${UFileName}`);
-      res.status(200).send({ fileName: UFileName, filePath: `/uploads/${UFileName}` });
-    });
-    
+    const savedFile = await fileUploadController.save(file);
+    const register = await artefatoController.setPhoto(Number(req.params.id), savedFile.filePath);
+    res.status(200).send(register);
   } catch (error) {
     next(error);
   }
+
 });
 
 artefatoRouter.use(errorHandlingMiddleware);

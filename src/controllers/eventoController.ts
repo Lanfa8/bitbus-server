@@ -29,7 +29,6 @@ export const eventoController = {
             }
         });
 
-        //TODO: Criar enum para tipo de pessoa
         if (!pessoa) {
             pessoa = await prisma.pessoa.create({
                 data: {
@@ -45,6 +44,8 @@ export const eventoController = {
                 data: evento.data,
                 local: evento.local,
                 tipo: evento.tipo,
+                nome: evento.nome,
+                descricao: evento.descricao,
                 pessoa: {
                     connect: {
                         id: pessoa.id
@@ -78,14 +79,43 @@ export const eventoController = {
 
         return Promise.resolve();
     },
-    async update(id: number, evento: Partial<EventoEntity>): Promise<EventoEntity> {
+    async update(id: number, evento: Partial<EventoEntity  & {
+        responsavel: Partial<PessoaEntity>;
+    }>): Promise<EventoEntity> {
         if (!id) throw new ValidationException('ID não informado', ['id']);
+
+        let pessoa = await prisma.pessoa.findFirst({
+            where: {
+                email: evento.responsavel.email
+            }
+        });
+
+        if (!pessoa) {
+            pessoa = await prisma.pessoa.create({
+                data: {
+                    nome: evento.responsavel.nome,
+                    email: evento.responsavel.email,
+                    tipo: evento.responsavel.tipo
+                }
+            });
+        }
         
         const updated = await prisma.evento.update({
             where: {
                 id
             },
-            data: evento
+            data: {
+                data: evento.data,
+                local: evento.local,
+                tipo: evento.tipo,
+                nome: evento.nome,
+                descricao: evento.descricao,
+                pessoa: {
+                    connect: {
+                        id: pessoa.id
+                    }
+                },
+            }
         });
 
         return updated;
@@ -128,6 +158,17 @@ export const eventoController = {
             data,
             total
         };
-    
+    },
+    async setPhoto(id: number, foto: string): Promise<EventoEntity> {
+        const updated = await prisma.evento.update({
+            where: {
+                id
+            },
+            data: {
+                foto
+            }
+        });
+
+        return updated;
     }
 };

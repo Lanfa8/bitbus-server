@@ -41,11 +41,14 @@ model pessoa {
 }
 
 model evento {
-  id          Int       @id @default(autoincrement())
-  data        DateTime? @db.DateTime(0)
-  local       String?   @db.VarChar(255)
-  tipo        Int       @db.TinyInt
-  responsavel Int?
+  id            Int       @id @default(autoincrement())
+  data          DateTime? @db.DateTime(0)
+  local         String?   @db.VarChar(255)
+  tipo          Int       @db.TinyInt
+  responsavel   Int?
+  foto          String?    @db.VarChar(255)
+  nome          String?    @db.VarChar(255)
+  descricao     String?    @db.VarChar(255)
   pessoa      pessoa?   @relation(fields: [responsavel], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "evento_ibfk_1")
 
   @@index([responsavel], map: "responsavel")

@@ -3,8 +3,9 @@ import { AlreadyCreatedRegister } from '../exceptions/AlreadyCreatedRegister';
 import { evento as EventoEntity, pessoa as PessoaEntity } from '@prisma/client';
 import { ValidationException } from '../exceptions/ValidationException';
 import { validateObjectNodes } from '../utils/validation';
-import { PaginationTypes } from 'src/utils/paginationTypes';
+import { PaginationTypes } from '../utils/paginationTypes';
 import { mailController } from './mailController';
+import { TipoPessoaEnum } from '../enum/TipoPessoaEnum';
 
 export const eventoController = {
     async save(evento: Partial<EventoEntity> & {
@@ -202,14 +203,20 @@ export const eventoController = {
         return true;
     },
     async addInscrito(id: number, inscrito: Partial<PessoaEntity>): Promise<void> {
-        const pessoa = await prisma.pessoa.findFirst({
+        let pessoa = await prisma.pessoa.findFirst({
             where: {
                 email: inscrito.email
             }
         });
 
         if (!pessoa) {
-            throw new ValidationException('Pessoa não encontrada', ['email']);
+            pessoa = await prisma.pessoa.create({
+                data: {
+                    nome: inscrito.nome,
+                    email: inscrito.email,
+                    tipo: TipoPessoaEnum.INSCRITO
+                }
+            });
         }
 
         if (await prisma.inscrito.findFirst({
@@ -228,21 +235,10 @@ export const eventoController = {
             }
         });
     },
-    async removeInscrito(id: number, inscrito: Partial<PessoaEntity>): Promise<void> {
-        const pessoa = await prisma.pessoa.findFirst({
+    async removeInscrito(id: number, idInscrito: number): Promise<void> {
+        await prisma.inscrito.delete({
             where: {
-                email: inscrito.email
-            }
-        });
-
-        if (!pessoa) {
-            throw new ValidationException('Pessoa não encontrada', ['email']);
-        }
-
-        await prisma.inscrito.deleteMany({
-            where: {
-                eventoId: id,
-                pessoaId: pessoa.id
+                id: idInscrito
             }
         });
     },

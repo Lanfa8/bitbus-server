@@ -200,5 +200,63 @@ export const eventoController = {
         }
 
         return true;
+    },
+    async addInscrito(id: number, inscrito: Partial<PessoaEntity>): Promise<void> {
+        const pessoa = await prisma.pessoa.findFirst({
+            where: {
+                email: inscrito.email
+            }
+        });
+
+        if (!pessoa) {
+            throw new ValidationException('Pessoa não encontrada', ['email']);
+        }
+
+        if (await prisma.inscrito.findFirst({
+            where: {
+                eventoId: id,
+                pessoaId: pessoa.id
+            }
+        })) {
+            throw new AlreadyCreatedRegister('Pessoa já inscrita nesse evento');
+        }
+
+        await prisma.inscrito.create({
+            data: {
+                eventoId: id,
+                pessoaId: pessoa.id
+            }
+        });
+    },
+    async removeInscrito(id: number, inscrito: Partial<PessoaEntity>): Promise<void> {
+        const pessoa = await prisma.pessoa.findFirst({
+            where: {
+                email: inscrito.email
+            }
+        });
+
+        if (!pessoa) {
+            throw new ValidationException('Pessoa não encontrada', ['email']);
+        }
+
+        await prisma.inscrito.deleteMany({
+            where: {
+                eventoId: id,
+                pessoaId: pessoa.id
+            }
+        });
+    },
+    async listInscritos(id: number): Promise<PessoaEntity[]> {
+        const inscritos = await prisma.inscrito.findMany({
+            where: {
+                eventoId: id
+            },
+            include: {
+                pessoa: true
+            }
+        });
+
+        return inscritos.map(inscrito => inscrito.pessoa);
     }
+
 };

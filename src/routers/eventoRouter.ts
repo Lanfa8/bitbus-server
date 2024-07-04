@@ -108,4 +108,32 @@ eventoRouter.put("/:id/foto", async (req: Request, res: Response, next: NextFunc
 
 });
 
+
+eventoRouter.put(":id/inscrito", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const register = await eventoController.addInscrito(Number(req.params.id), req.body.inscritoId);
+    res.status(200).send(register);
+  } catch (error) {
+    next(error);
+  }
+});
+
+eventoRouter.delete(":id/inscrito", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const register = await eventoController.removeInscrito(Number(req.params.id), req.body.inscritoId);
+    res.status(200).send(register);
+  } catch (error) {
+    next(error);
+  }
+});
+
+eventoRouter.get("/:id/instritos", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const register = await eventoController.listInscritos(Number(req.params.id));
+    res.status(200).send(register);
+  } catch (error) {
+    next(error);
+  }
+});
+
 eventoRouter.use(errorHandlingMiddleware);

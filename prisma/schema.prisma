@@ -33,23 +33,36 @@ model categoria {
 }
 
 model pessoa {
-  id     Int      @id @default(autoincrement())
-  nome   String   @db.VarChar(255)
-  email  String   @db.VarChar(255)
-  tipo   Int      @db.TinyInt
-  evento evento[]
+  id       Int        @id @default(autoincrement())
+  nome     String     @db.VarChar(255)
+  email    String     @db.VarChar(255)
+  tipo     Int        @db.TinyInt
+  evento   evento[]
+  inscrito inscrito[]
 }
 
 model evento {
-  id            Int       @id @default(autoincrement())
-  data          DateTime? @db.DateTime(0)
-  local         String?   @db.VarChar(255)
-  tipo          Int       @db.TinyInt
-  responsavel   Int?
-  foto          String?    @db.VarChar(255)
-  nome          String?    @db.VarChar(255)
-  descricao     String?    @db.VarChar(255)
-  pessoa      pessoa?   @relation(fields: [responsavel], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "evento_ibfk_1")
+  id          Int        @id @default(autoincrement())
+  data        DateTime?  @db.DateTime(0)
+  local       String?    @db.VarChar(255)
+  tipo        Int        @db.TinyInt
+  responsavel Int?
+  foto        String?    @db.VarChar(255)
+  nome        String?    @db.VarChar(255)
+  descricao   String?    @db.VarChar(255)
+  pessoa      pessoa?    @relation(fields: [responsavel], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "evento_ibfk_1")
+  inscrito    inscrito[]
 
   @@index([responsavel], map: "responsavel")
+}
+
+model inscrito {
+  id       Int     @id @default(autoincrement())
+  eventoId Int?
+  pessoaId Int?
+  evento   evento? @relation(fields: [eventoId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "inscrito_ibfk_1")
+  pessoa   pessoa? @relation(fields: [pessoaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "inscrito_ibfk_2")
+
+  @@index([eventoId], map: "eventoId")
+  @@index([pessoaId], map: "pessoaId")
 }
